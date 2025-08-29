@@ -20,6 +20,7 @@ namespace WaterTemperature.Models
                 {
                     _temperature = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsValid)); // Notify when validity changes
                 }
             }
         }
@@ -33,6 +34,7 @@ namespace WaterTemperature.Models
                 {
                     _measurementDate = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsValid)); // Notify when validity changes
                 }
             }
         }

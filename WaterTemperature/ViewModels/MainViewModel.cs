@@ -144,6 +144,19 @@ namespace WaterTemperature.ViewModels
             await LoadMeasurementsAsync();
         }
 
+        // Method to manually sync chart data with current measurements
+        public void SyncChartData()
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                ChartData.Clear();
+                foreach (var measurement in Measurements.Where(m => m.IsValid))
+                {
+                    ChartData.Add(measurement);
+                }
+            });
+        }
+
         [RelayCommand]
         private async Task DeleteMeasurement(WaterTemperatureMeasurement measurement)
         {

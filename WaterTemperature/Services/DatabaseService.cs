@@ -20,7 +20,14 @@ namespace WaterTemperature.Services
 
         public async Task<int> SaveMeasurementAsync(WaterTemperatureMeasurement measurement)
         {
-            return await _database.InsertAsync(measurement);
+            var result = await _database.InsertAsync(measurement);
+            // The measurement object's Id property is automatically updated by SQLite
+            return result;
+        }
+
+        public async Task<WaterTemperatureMeasurement?> GetMeasurementByIdAsync(int id)
+        {
+            return await _database.Table<WaterTemperatureMeasurement>().Where(m => m.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<int> UpdateMeasurementAsync(WaterTemperatureMeasurement measurement)

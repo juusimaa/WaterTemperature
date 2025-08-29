@@ -24,6 +24,8 @@ public partial class MeasurementsPage : ContentPage
         {
             try
             {
+                bool wasValidBefore = _viewModel.ChartData.Contains(measurement);
+                
                 // Only save to database if both temperature and date have valid values
                 if (measurement.IsValid)
                 {
@@ -38,21 +40,29 @@ public partial class MeasurementsPage : ContentPage
                         await _databaseService.UpdateMeasurementAsync(measurement);
                     }
                     
-                    // Refresh the data to update both grid and chart
-                    await _viewModel.RefreshDataAsync();
+                    // Add to chart if not already there
+                    if (!wasValidBefore)
+                    {
+                        await MainThread.InvokeOnMainThreadAsync(() =>
+                        {
+                            _viewModel.ChartData.Add(measurement);
+                        });
+                    }
                 }
                 else
                 {
-                    // If measurement becomes invalid, remove from chart data but keep in grid
-                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    // If measurement becomes invalid, remove from chart data
+                    if (wasValidBefore)
                     {
-                        var chartItem = _viewModel.ChartData.FirstOrDefault(c => c.Id == measurement.Id);
-                        if (chartItem != null)
+                        await MainThread.InvokeOnMainThreadAsync(() =>
                         {
-                            _viewModel.ChartData.Remove(chartItem);
-                        }
-                    });
+                            _viewModel.ChartData.Remove(measurement);
+                        });
+                    }
                 }
+                
+                // Ensure chart is always in sync as a fallback
+                _viewModel.SyncChartData();
             }
             catch (Exception ex)
             {
