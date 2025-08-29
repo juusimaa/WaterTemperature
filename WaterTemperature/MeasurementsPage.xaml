@@ -7,16 +7,35 @@
     <!-- BindingContext is set in code-behind -->
     <VerticalStackLayout Spacing="25" Padding="30,0">
         <Label Text="Edit Measurements" FontSize="20" HorizontalOptions="Center" Margin="0,20,0,10" />
+        
+        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+            <!-- Add new measurement button for when grid is empty -->
+            <Button x:Name="addButton" 
+                    Text="Add New Measurement" 
+                    Command="{Binding AddNewMeasurementCommand}"
+                    WidthRequest="180" />
+                    
+            <!-- Delete selected measurement button -->
+            <Button x:Name="deleteButton"
+                    Text="Delete Selected"
+                    Clicked="OnDeleteSelectedClicked"
+                    BackgroundColor="Red"
+                    TextColor="White"
+                    WidthRequest="120" />
+        </HorizontalStackLayout>
+        
         <syncfusion:SfDataGrid
             x:Name="dataGrid"
             ItemsSource="{Binding Measurements}"
             AllowEditing="True"
-            EditTapAction="OnTap"
+            EditTapAction="OnDoubleTap"
             SelectionMode="Single"
+            NavigationMode="Cell"
+            AllowKeyboardNavigation="True"
             HeaderRowHeight="40"
             RowHeight="40"
             CellValueChanged="OnDataGridCellValueChanged"
             Margin="0,10,0,0" />
-        <Label Text="Tap a cell to edit the value. Tap a row to select, then tap again to delete." FontSize="14" TextColor="Gray" HorizontalOptions="Center" Margin="0,10,0,0" />
+        <Label Text="Double-click a cell to edit. Press Enter to confirm. Select a row and click 'Delete Selected' to remove." FontSize="14" TextColor="Gray" HorizontalOptions="Center" Margin="0,10,0,0" />
     </VerticalStackLayout>
 </ContentPage>

@@ -16,31 +16,33 @@ public partial class MeasurementsPage : ContentPage
         _viewModel = viewModel;
         _databaseService = databaseService;
         BindingContext = viewModel;
-        
-        // Add long press gesture for deletion
-        var longPressGesture = new TapGestureRecognizer
-        {
-            NumberOfTapsRequired = 1
-        };
-        longPressGesture.Tapped += OnDataGridLongPressed;
-        dataGrid.GestureRecognizers.Add(longPressGesture);
     }
 
     private async void OnDataGridCellValueChanged(object sender, DataGridCellValueChangedEventArgs e)
     {
         if (e.RowData is WaterTemperatureMeasurement measurement)
         {
-            // Save the updated measurement to the database
-            await _databaseService.UpdateMeasurementAsync(measurement);
+            try
+            {
+                // Save the updated measurement to the database
+                await _databaseService.UpdateMeasurementAsync(measurement);
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Error", $"Failed to save changes: {ex.Message}", "OK");
+            }
         }
     }
 
-    private async void OnDataGridLongPressed(object? sender, TappedEventArgs e)
+    private async void OnDeleteSelectedClicked(object sender, EventArgs e)
     {
-        // Get the selected measurement
         if (dataGrid.SelectedRow is WaterTemperatureMeasurement selectedMeasurement)
         {
             await _viewModel.DeleteMeasurementCommand.ExecuteAsync(selectedMeasurement);
+        }
+        else
+        {
+            await Shell.Current.DisplayAlert("No Selection", "Please select a row to delete.", "OK");
         }
     }
 }

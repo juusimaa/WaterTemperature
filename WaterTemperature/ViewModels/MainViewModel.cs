@@ -69,6 +69,19 @@ namespace WaterTemperature.ViewModels
             await LoadMeasurementsAsync();
         }
 
+        [RelayCommand]
+        private async Task AddNewMeasurement()
+        {
+            var newMeasurement = new WaterTemperatureMeasurement
+            {
+                Temperature = 20.0, // Default temperature
+                MeasurementDate = DateTime.Now
+            };
+
+            await _databaseService.SaveMeasurementAsync(newMeasurement);
+            await LoadMeasurementsAsync();
+        }
+
         private async Task LoadMeasurementsAsync()
         {
             try
