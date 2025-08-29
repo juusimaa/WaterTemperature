@@ -2,8 +2,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microcharts;
-using SkiaSharp;
 using WaterTemperature.Models;
 using WaterTemperature.Services;
 
@@ -20,22 +18,45 @@ namespace WaterTemperature.ViewModels
         private DateTime measurementDate = DateTime.Now;
 
         [ObservableProperty]
-        [property: EditorBrowsable(EditorBrowsableState.Never)]
-        private Chart? chart;
+        private TimeSpan measurementTime;
 
         public ObservableCollection<WaterTemperatureMeasurement> Measurements { get; } = [];
+
+        // Chart data for Syncfusion
+        public ObservableCollection<WaterTemperatureMeasurement> ChartData { get; } = [];
+
+        partial void OnMeasurementTimeChanged(TimeSpan value)
+        {
+            // When time changes, update the date part but avoid circular updates
+            var newDateTime = MeasurementDate.Date.Add(value);
+            if (newDateTime != MeasurementDate)
+            {
+                SetProperty(ref measurementDate, newDateTime, nameof(MeasurementDate));
+            }
+        }
+
+        partial void OnMeasurementDateChanged(DateTime value)
+        {
+            // When date changes, update the time to match
+            var timeOfDay = value.TimeOfDay;
+            if (timeOfDay != MeasurementTime)
+            {
+                SetProperty(ref measurementTime, timeOfDay, nameof(MeasurementTime));
+            }
+        }
 
         public MainViewModel(DatabaseService databaseService)
         {
             _databaseService = databaseService;
 
-            // Initialize with a default chart showing "No data"
-            InitializeEmptyChart();
+            // Initialize measurement time
+            MeasurementTime = DateTime.Now.TimeOfDay;
             
             // Load data asynchronously
             Task.Run(LoadMeasurementsAsync);
         }
 
+        [RelayCommand]
         private async Task SaveMeasurement()
         {
             var measurement = new WaterTemperatureMeasurement
@@ -54,53 +75,30 @@ namespace WaterTemperature.ViewModels
             {
                 var measurements = await _databaseService.GetMeasurementsAsync();
                 
-                // Update the measurements collection
-                MainThread.BeginInvokeOnMainThread(() =>
+                // Update both collections on main thread
+                await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     Measurements.Clear();
+                    ChartData.Clear();
+                    
                     foreach (var measurement in measurements)
                     {
                         Measurements.Add(measurement);
+                        ChartData.Add(measurement);
                     }
-                });
-
-                if (measurements.Count == 0)
-                {
-                    MainThread.BeginInvokeOnMainThread(() => InitializeEmptyChart());
-                    return;
-                }
-
-                var entries = measurements
-                    .OrderBy(m => m.MeasurementDate)
-                    .Select(m => new ChartEntry((float)m.Temperature)
-                    {
-                        Label = m.MeasurementDate.ToString("d"),
-                        ValueLabel = $"{m.Temperature:F1}°C",
-                        Color = SKColor.Parse("#2196F3")
-                    })
-                    .ToList();
-
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    Chart = new LineChart
-                    {
-                        Entries = entries,
-                        LabelTextSize = 30,
-                        LabelOrientation = Orientation.Horizontal,
-                        ValueLabelOrientation = Orientation.Horizontal,
-                        LineSize = 8,
-                        PointSize = 18,
-                        BackgroundColor = SKColors.Transparent,
-                        IsAnimated = true
-                    };
                 });
             }
             catch (Exception)
             {
-                MainThread.BeginInvokeOnMainThread(() => InitializeEmptyChart());
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    Measurements.Clear();
+                    ChartData.Clear();
+                });
             }
         }
 
+        [RelayCommand]
         private async Task DeleteMeasurement(WaterTemperatureMeasurement measurement)
         {
             if (measurement != null)
@@ -108,31 +106,6 @@ namespace WaterTemperature.ViewModels
                 await _databaseService.DeleteMeasurementAsync(measurement);
                 await LoadMeasurementsAsync();
             }
-        }
-
-        private void InitializeEmptyChart()
-        {
-            var emptyEntries = new List<ChartEntry>
-            {
-                new(0)
-                {
-                    Label = "No data",
-                    ValueLabel = "No data",
-                    Color = SKColor.Parse("#2196F3")
-                }
-            };
-
-            Chart = new LineChart
-            {
-                Entries = emptyEntries,
-                LabelTextSize = 30,
-                LabelOrientation = Orientation.Horizontal,
-                ValueLabelOrientation = Orientation.Horizontal,
-                LineSize = 8,
-                PointSize = 18,
-                BackgroundColor = SKColors.Transparent,
-                IsAnimated = false
-            };
         }
     }
 }

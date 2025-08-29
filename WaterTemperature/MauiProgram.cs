@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microcharts.Maui;
+using Syncfusion.Maui.Core.Hosting;
 using WaterTemperature.Services;
 using WaterTemperature.ViewModels;
 
@@ -12,7 +12,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
-            .UseMicrocharts()
+            .ConfigureSyncfusionCore()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
