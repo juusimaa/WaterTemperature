@@ -23,6 +23,11 @@ namespace WaterTemperature.Services
             return await _database.InsertAsync(measurement);
         }
 
+        public async Task<int> UpdateMeasurementAsync(WaterTemperatureMeasurement measurement)
+        {
+            return await _database.UpdateAsync(measurement);
+        }
+
         public async Task<int> DeleteMeasurementAsync(WaterTemperatureMeasurement measurement)
         {
             return await _database.DeleteAsync(measurement);
