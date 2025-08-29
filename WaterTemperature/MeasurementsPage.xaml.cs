@@ -24,11 +24,35 @@ public partial class MeasurementsPage : ContentPage
         {
             try
             {
-                // Save the updated measurement to the database
-                await _databaseService.UpdateMeasurementAsync(measurement);
-                
-                // Refresh the chart data by reloading all measurements
-                await _viewModel.RefreshDataAsync();
+                // Only save to database if both temperature and date have valid values
+                if (measurement.IsValid)
+                {
+                    if (measurement.Id == 0)
+                    {
+                        // New measurement - insert into database
+                        await _databaseService.SaveMeasurementAsync(measurement);
+                    }
+                    else
+                    {
+                        // Existing measurement - update in database
+                        await _databaseService.UpdateMeasurementAsync(measurement);
+                    }
+                    
+                    // Refresh the data to update both grid and chart
+                    await _viewModel.RefreshDataAsync();
+                }
+                else
+                {
+                    // If measurement becomes invalid, remove from chart data but keep in grid
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        var chartItem = _viewModel.ChartData.FirstOrDefault(c => c.Id == measurement.Id);
+                        if (chartItem != null)
+                        {
+                            _viewModel.ChartData.Remove(chartItem);
+                        }
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -41,7 +65,19 @@ public partial class MeasurementsPage : ContentPage
     {
         if (dataGrid.SelectedRow is WaterTemperatureMeasurement selectedMeasurement)
         {
-            await _viewModel.DeleteMeasurementCommand.ExecuteAsync(selectedMeasurement);
+            if (selectedMeasurement.Id > 0)
+            {
+                // Measurement is in database, use the ViewModel's delete command
+                await _viewModel.DeleteMeasurementCommand.ExecuteAsync(selectedMeasurement);
+            }
+            else
+            {
+                // Measurement is only in memory (not saved to database), just remove from collection
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    _viewModel.Measurements.Remove(selectedMeasurement);
+                });
+            }
         }
         else
         {

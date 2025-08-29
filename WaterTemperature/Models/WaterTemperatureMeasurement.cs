@@ -5,13 +5,13 @@ namespace WaterTemperature.Models
 {
     public class WaterTemperatureMeasurement : INotifyPropertyChanged
     {
-        private double _temperature;
-        private DateTime _measurementDate;
+        private double? _temperature;
+        private DateTime? _measurementDate;
 
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         
-        public double Temperature 
+        public double? Temperature 
         { 
             get => _temperature;
             set
@@ -24,7 +24,7 @@ namespace WaterTemperature.Models
             }
         }
         
-        public DateTime MeasurementDate 
+        public DateTime? MeasurementDate 
         { 
             get => _measurementDate;
             set
@@ -36,6 +36,9 @@ namespace WaterTemperature.Models
                 }
             }
         }
+
+        // Helper property to check if the measurement has valid data
+        public bool IsValid => Temperature.HasValue && MeasurementDate.HasValue;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

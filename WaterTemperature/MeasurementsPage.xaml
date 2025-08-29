@@ -45,6 +45,6 @@
                 </syncfusion:SfDataGrid.Columns>
             </syncfusion:SfDataGrid>
         </HorizontalStackLayout>
-        <Label Text="Double-click a cell to edit. Press Enter to confirm. Select a row and click 'Delete Selected' to remove." FontSize="14" TextColor="Gray" HorizontalOptions="Center" Margin="0,10,0,0" />
+        <Label Text="Double-click a cell to edit. Enter both temperature and date to save to database and show in chart." FontSize="14" TextColor="Gray" HorizontalOptions="Center" Margin="0,10,0,0" />
     </VerticalStackLayout>
 </ContentPage>

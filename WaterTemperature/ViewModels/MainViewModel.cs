@@ -22,8 +22,8 @@ namespace WaterTemperature.ViewModels
 
         public ObservableCollection<WaterTemperatureMeasurement> Measurements { get; } = [];
 
-        // Chart data for Syncfusion - use the same collection for automatic synchronization
-        public ObservableCollection<WaterTemperatureMeasurement> ChartData => Measurements;
+        // Chart data should only include valid measurements (with both temperature and date)
+        public ObservableCollection<WaterTemperatureMeasurement> ChartData { get; } = [];
 
         partial void OnMeasurementTimeChanged(TimeSpan value)
         {
@@ -59,27 +59,40 @@ namespace WaterTemperature.ViewModels
         [RelayCommand]
         private async Task SaveMeasurement()
         {
-            var measurement = new WaterTemperatureMeasurement
+            // Only save if we have valid temperature and date values
+            if (Temperature > 0 && MeasurementDate != default)
             {
-                Temperature = Temperature,
-                MeasurementDate = MeasurementDate
-            };
+                var measurement = new WaterTemperatureMeasurement
+                {
+                    Temperature = Temperature,
+                    MeasurementDate = MeasurementDate
+                };
 
-            await _databaseService.SaveMeasurementAsync(measurement);
-            await LoadMeasurementsAsync();
+                await _databaseService.SaveMeasurementAsync(measurement);
+                await LoadMeasurementsAsync();
+                
+                // Reset form values
+                Temperature = 0;
+                MeasurementDate = DateTime.Now;
+                MeasurementTime = DateTime.Now.TimeOfDay;
+            }
         }
 
         [RelayCommand]
         private async Task AddNewMeasurement()
         {
+            // Create a new measurement with null values (no database save until valid data is entered)
             var newMeasurement = new WaterTemperatureMeasurement
             {
-                Temperature = 20.0, // Default temperature
-                MeasurementDate = DateTime.Now
+                Temperature = null, // No default value
+                MeasurementDate = null // No default value
             };
 
-            await _databaseService.SaveMeasurementAsync(newMeasurement);
-            await LoadMeasurementsAsync();
+            // Add to collection for editing without saving to database
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                Measurements.Add(newMeasurement);
+            });
         }
 
         private async Task LoadMeasurementsAsync()
@@ -88,14 +101,30 @@ namespace WaterTemperature.ViewModels
             {
                 var measurements = await _databaseService.GetMeasurementsAsync();
                 
-                // Update the single collection on main thread - ChartData will automatically reflect changes
+                // Update the collections on main thread
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    Measurements.Clear();
+                    // Keep track of any invalid measurements (with null values) that are being edited
+                    var invalidMeasurements = Measurements.Where(m => !m.IsValid).ToList();
                     
+                    Measurements.Clear();
+                    ChartData.Clear();
+                    
+                    // Add valid measurements from database to both collections
                     foreach (var measurement in measurements)
                     {
                         Measurements.Add(measurement);
+                        // Only add to chart if valid (has both temperature and date)
+                        if (measurement.IsValid)
+                        {
+                            ChartData.Add(measurement);
+                        }
+                    }
+                    
+                    // Add back any invalid measurements to the grid (but not to chart)
+                    foreach (var invalidMeasurement in invalidMeasurements)
+                    {
+                        Measurements.Add(invalidMeasurement);
                     }
                 });
             }
@@ -104,6 +133,7 @@ namespace WaterTemperature.ViewModels
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     Measurements.Clear();
+                    ChartData.Clear();
                 });
             }
         }
@@ -122,14 +152,28 @@ namespace WaterTemperature.ViewModels
                 // Show confirmation dialog
                 bool confirm = await Shell.Current.DisplayAlert(
                     "Delete Measurement",
-                    $"Are you sure you want to delete the measurement of {measurement.Temperature}°C from {measurement.MeasurementDate:g}?",
+                    measurement.IsValid 
+                        ? $"Are you sure you want to delete the measurement of {measurement.Temperature}°C from {measurement.MeasurementDate:g}?"
+                        : "Are you sure you want to delete this incomplete measurement?",
                     "Delete",
                     "Cancel");
 
                 if (confirm)
                 {
-                    await _databaseService.DeleteMeasurementAsync(measurement);
-                    await LoadMeasurementsAsync();
+                    // Only try to delete from database if it has an ID (was saved)
+                    if (measurement.Id > 0)
+                    {
+                        await _databaseService.DeleteMeasurementAsync(measurement);
+                        await LoadMeasurementsAsync();
+                    }
+                    else
+                    {
+                        // Just remove from memory if not saved to database
+                        await MainThread.InvokeOnMainThreadAsync(() =>
+                        {
+                            Measurements.Remove(measurement);
+                        });
+                    }
                 }
             }
         }
