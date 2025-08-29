@@ -2,41 +2,18 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:WaterTemperature.ViewModels"
+             xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
              x:Class="WaterTemperature.MeasurementsPage">
     <!-- BindingContext is set in code-behind -->
-    <ScrollView>
-        <VerticalStackLayout Spacing="25" Padding="30,0">
-            <Border Padding="15" Stroke="LightGray" StrokeThickness="1" StrokeShape="RoundRectangle 10">
-                <Border.Shadow>
-                    <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.2" />
-                </Border.Shadow>
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Temperature (°C)" FontSize="16" TextColor="Gray"/>
-                    <Entry Placeholder="Enter temperature" Text="{Binding Temperature}" Keyboard="Numeric" HorizontalOptions="Fill" />
-                    <Label Text="Date and Time" FontSize="16" TextColor="Gray" Margin="0,10,0,0"/>
-                    <HorizontalStackLayout Spacing="10">
-                        <DatePicker Date="{Binding MeasurementDate}" HorizontalOptions="Start" WidthRequest="150" />
-                        <TimePicker Time="{Binding MeasurementTime}" HorizontalOptions="Start" WidthRequest="100" />
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Border>
-            <Button x:Name="SaveButton" Text="Save Measurement" SemanticProperties.Hint="Saves the water temperature measurement" Command="{Binding SaveMeasurementCommand}" HorizontalOptions="Center" />
-            <CollectionView ItemsSource="{Binding Measurements}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Padding="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Label Text="{Binding Temperature, StringFormat='{0}°C'}" VerticalOptions="Center" />
-                            <Label Grid.Column="1" Text="{Binding MeasurementDate, StringFormat='{0:g}'}" VerticalOptions="Center" />
-                            <Button Grid.Column="2" Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=DeleteMeasurementCommand}" CommandParameter="{Binding .}" SemanticProperties.Hint="Deletes this temperature measurement" HeightRequest="40" Padding="10,0" />
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </VerticalStackLayout>
-    </ScrollView>
+    <VerticalStackLayout Spacing="25" Padding="30,0">
+        <Label Text="Edit Measurements" FontSize="20" HorizontalOptions="Center" Margin="0,20,0,10" />
+        <syncfusion:SfDataGrid
+            ItemsSource="{Binding Measurements}"
+            AllowEditing="True"
+            SelectionMode="Single"
+            HeaderRowHeight="40"
+            RowHeight="40"
+            Margin="0,10,0,0" />
+        <Label Text="Tap a cell to edit. Swipe left to delete." FontSize="14" TextColor="Gray" HorizontalOptions="Center" Margin="0,10,0,0" />
+    </VerticalStackLayout>
 </ContentPage>
