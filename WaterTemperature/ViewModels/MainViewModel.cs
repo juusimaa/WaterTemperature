@@ -103,8 +103,18 @@ namespace WaterTemperature.ViewModels
         {
             if (measurement != null)
             {
-                await _databaseService.DeleteMeasurementAsync(measurement);
-                await LoadMeasurementsAsync();
+                // Show confirmation dialog
+                bool confirm = await Shell.Current.DisplayAlert(
+                    "Delete Measurement",
+                    $"Are you sure you want to delete the measurement of {measurement.Temperature}°C from {measurement.MeasurementDate:g}?",
+                    "Delete",
+                    "Cancel");
+
+                if (confirm)
+                {
+                    await _databaseService.DeleteMeasurementAsync(measurement);
+                    await LoadMeasurementsAsync();
+                }
             }
         }
     }
