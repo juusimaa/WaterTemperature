@@ -12,7 +12,7 @@ namespace WaterTemperature.ViewModels
         private readonly DatabaseService _databaseService;
         private double _temperature;
         private DateTime _measurementDate = DateTime.Now;
-        private Chart _chart;
+        private Chart? _chart;
 
         public MainViewModel(DatabaseService databaseService)
         {
@@ -24,7 +24,7 @@ namespace WaterTemperature.ViewModels
             InitializeEmptyChart();
             
             // Load data asynchronously
-            Task.Run(async () => await LoadMeasurementsAsync());
+            Task.Run(LoadMeasurementsAsync);
         }
 
         public double Temperature
@@ -53,12 +53,12 @@ namespace WaterTemperature.ViewModels
             }
         }
 
-        public ObservableCollection<WaterTemperatureMeasurement> Measurements { get; } = new();
+        public ObservableCollection<WaterTemperatureMeasurement> Measurements { get; } = [];
 
         public ICommand SaveCommand { get; }
         public ICommand DeleteCommand { get; }
 
-        public Chart Chart
+        public Chart? Chart
         {
             get => _chart;
             private set
@@ -99,7 +99,7 @@ namespace WaterTemperature.ViewModels
                     }
                 });
 
-                if (!measurements.Any())
+                if (measurements.Count == 0)
                 {
                     MainThread.BeginInvokeOnMainThread(() => InitializeEmptyChart());
                     return;
@@ -149,7 +149,7 @@ namespace WaterTemperature.ViewModels
         {
             var emptyEntries = new List<ChartEntry>
             {
-                new ChartEntry(0)
+                new(0)
                 {
                     Label = "No data",
                     ValueLabel = "No data",
