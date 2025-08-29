@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:WaterTemperature.ViewModels"
+             xmlns:chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
+             x:Class="WaterTemperature.GraphPage">
+    <!-- BindingContext is set in code-behind -->
+    <VerticalStackLayout>
+        <Label Text="Water Temperature History" FontSize="24" HorizontalOptions="Center" Margin="0,20,0,10" />
+        <Border Stroke="Transparent" StrokeThickness="0" HeightRequest="200">
+            <chart:SfCartesianChart HeightRequest="200">
+                <chart:SfCartesianChart.XAxes>
+                    <chart:DateTimeAxis />
+                </chart:SfCartesianChart.XAxes>
+                <chart:SfCartesianChart.YAxes>
+                    <chart:NumericalAxis />
+                </chart:SfCartesianChart.YAxes>
+                <chart:LineSeries ItemsSource="{Binding ChartData}"
+                                  XBindingPath="MeasurementDate"
+                                  YBindingPath="Temperature"
+                                  ShowDataLabels="True"
+                                  Fill="#2196F3"
+                                  StrokeWidth="3">
+                    <chart:LineSeries.MarkerSettings>
+                        <chart:ChartMarkerSettings Type="Circle" Width="8" Height="8" Fill="#2196F3" />
+                    </chart:LineSeries.MarkerSettings>
+                </chart:LineSeries>
+            </chart:SfCartesianChart>
+        </Border>
+    </VerticalStackLayout>
+</ContentPage>

@@ -6,9 +6,19 @@
     xmlns:local="clr-namespace:WaterTemperature"
     Title="WaterTemperature">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <TabBar>
+        <Tab Title="Graph">
+            <ShellContent
+                Title="Graph"
+                ContentTemplate="{DataTemplate local:GraphPage}"
+                Route="GraphPage" />
+        </Tab>
+        <Tab Title="Measurements">
+            <ShellContent
+                Title="Measurements"
+                ContentTemplate="{DataTemplate local:MeasurementsPage}"
+                Route="MeasurementsPage" />
+        </Tab>
+    </TabBar>
 
 </Shell>

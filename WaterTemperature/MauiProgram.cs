@@ -23,6 +23,8 @@ public static class MauiProgram
         builder.Services.AddSingleton(new DatabaseService(dbPath));
         builder.Services.AddTransient<MainViewModel>();
         builder.Services.AddTransient<MainPage>();
+        builder.Services.AddTransient<GraphPage>();
+        builder.Services.AddTransient<MeasurementsPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();
