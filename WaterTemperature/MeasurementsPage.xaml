@@ -24,18 +24,27 @@
                     WidthRequest="120" />
         </HorizontalStackLayout>
         
-        <syncfusion:SfDataGrid
-            x:Name="dataGrid"
-            ItemsSource="{Binding Measurements}"
-            AllowEditing="True"
-            EditTapAction="OnDoubleTap"
-            SelectionMode="Single"
-            NavigationMode="Cell"
-            AllowKeyboardNavigation="True"
-            HeaderRowHeight="40"
-            RowHeight="40"
-            CellValueChanged="OnDataGridCellValueChanged"
-            Margin="0,10,0,0" />
+        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+            <syncfusion:SfDataGrid 
+                x:Name="dataGrid"
+                ItemsSource="{Binding Measurements}"
+                AllowEditing="True"
+                EditTapAction="OnDoubleTap"
+                SelectionMode="Single"
+                NavigationMode="Cell"
+                AutoGenerateColumnsMode="None"
+                AllowKeyboardNavigation="True"
+                CellValueChanged="OnDataGridCellValueChanged"
+                ColumnWidthMode="Auto"
+                Margin="0,10,0,0">
+                <syncfusion:SfDataGrid.Columns>
+                    <syncfusion:DataGridNumericColumn 
+                        HeaderText="Temperature (°C)" 
+                        MappingName="Temperature" />
+                    <syncfusion:DataGridDateColumn HeaderText="Date" MappingName="MeasurementDate" />
+                </syncfusion:SfDataGrid.Columns>
+            </syncfusion:SfDataGrid>
+        </HorizontalStackLayout>
         <Label Text="Double-click a cell to edit. Press Enter to confirm. Select a row and click 'Delete Selected' to remove." FontSize="14" TextColor="Gray" HorizontalOptions="Center" Margin="0,10,0,0" />
     </VerticalStackLayout>
 </ContentPage>
