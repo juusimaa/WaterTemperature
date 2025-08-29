@@ -7,6 +7,13 @@
     <!-- BindingContext is set in code-behind -->
     <VerticalStackLayout>
         <Label Text="Water Temperature History" FontSize="24" HorizontalOptions="Center" Margin="0,20,0,10" />
+        
+        <!-- Optional refresh button -->
+        <Button Text="Refresh Chart" 
+                Command="{Binding RefreshChartCommand}" 
+                HorizontalOptions="Center"
+                Margin="0,0,0,10" />
+        
         <Border Stroke="Transparent" StrokeThickness="0" HeightRequest="200">
             <chart:SfCartesianChart HeightRequest="200">
                 <chart:SfCartesianChart.XAxes>

@@ -158,6 +158,12 @@ namespace WaterTemperature.ViewModels
         }
 
         [RelayCommand]
+        private async Task RefreshChart()
+        {
+            await RefreshDataAsync();
+        }
+
+        [RelayCommand]
         private async Task DeleteMeasurement(WaterTemperatureMeasurement measurement)
         {
             if (measurement != null)
