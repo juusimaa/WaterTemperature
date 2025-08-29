@@ -22,8 +22,8 @@ namespace WaterTemperature.ViewModels
 
         public ObservableCollection<WaterTemperatureMeasurement> Measurements { get; } = [];
 
-        // Chart data for Syncfusion
-        public ObservableCollection<WaterTemperatureMeasurement> ChartData { get; } = [];
+        // Chart data for Syncfusion - use the same collection for automatic synchronization
+        public ObservableCollection<WaterTemperatureMeasurement> ChartData => Measurements;
 
         partial void OnMeasurementTimeChanged(TimeSpan value)
         {
@@ -88,16 +88,14 @@ namespace WaterTemperature.ViewModels
             {
                 var measurements = await _databaseService.GetMeasurementsAsync();
                 
-                // Update both collections on main thread
+                // Update the single collection on main thread - ChartData will automatically reflect changes
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     Measurements.Clear();
-                    ChartData.Clear();
                     
                     foreach (var measurement in measurements)
                     {
                         Measurements.Add(measurement);
-                        ChartData.Add(measurement);
                     }
                 });
             }
@@ -106,9 +104,14 @@ namespace WaterTemperature.ViewModels
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     Measurements.Clear();
-                    ChartData.Clear();
                 });
             }
+        }
+
+        // Public method to refresh data from external calls (like DataGrid updates)
+        public async Task RefreshDataAsync()
+        {
+            await LoadMeasurementsAsync();
         }
 
         [RelayCommand]

@@ -26,6 +26,9 @@ public partial class MeasurementsPage : ContentPage
             {
                 // Save the updated measurement to the database
                 await _databaseService.UpdateMeasurementAsync(measurement);
+                
+                // Refresh the chart data by reloading all measurements
+                await _viewModel.RefreshDataAsync();
             }
             catch (Exception ex)
             {
