@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
-using System.Windows.Input;
+using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microcharts;
 using SkiaSharp;
 using WaterTemperature.Models;
@@ -7,68 +9,31 @@ using WaterTemperature.Services;
 
 namespace WaterTemperature.ViewModels
 {
-    public class MainViewModel : BindableObject
+    public partial class MainViewModel : ObservableObject
     {
         private readonly DatabaseService _databaseService;
-        private double _temperature;
-        private DateTime _measurementDate = DateTime.Now;
-        private Chart? _chart;
+
+        [ObservableProperty]
+        private double temperature;
+
+        [ObservableProperty]
+        private DateTime measurementDate = DateTime.Now;
+
+        [ObservableProperty]
+        [property: EditorBrowsable(EditorBrowsableState.Never)]
+        private Chart? chart;
+
+        public ObservableCollection<WaterTemperatureMeasurement> Measurements { get; } = [];
 
         public MainViewModel(DatabaseService databaseService)
         {
             _databaseService = databaseService;
-            SaveCommand = new Command(async () => await SaveMeasurement());
-            DeleteCommand = new Command<WaterTemperatureMeasurement>(async (measurement) => await DeleteMeasurement(measurement));
 
             // Initialize with a default chart showing "No data"
             InitializeEmptyChart();
             
             // Load data asynchronously
             Task.Run(LoadMeasurementsAsync);
-        }
-
-        public double Temperature
-        {
-            get => _temperature;
-            set
-            {
-                if (_temperature != value)
-                {
-                    _temperature = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public DateTime MeasurementDate
-        {
-            get => _measurementDate;
-            set
-            {
-                if (_measurementDate != value)
-                {
-                    _measurementDate = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public ObservableCollection<WaterTemperatureMeasurement> Measurements { get; } = [];
-
-        public ICommand SaveCommand { get; }
-        public ICommand DeleteCommand { get; }
-
-        public Chart? Chart
-        {
-            get => _chart;
-            private set
-            {
-                if (_chart != value)
-                {
-                    _chart = value;
-                    OnPropertyChanged();
-                }
-            }
         }
 
         private async Task SaveMeasurement()

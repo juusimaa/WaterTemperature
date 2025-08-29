@@ -33,7 +33,7 @@
                 x:Name="SaveButton"
                 Text="Save Measurement"
                 SemanticProperties.Hint="Saves the water temperature measurement"
-                Command="{Binding SaveCommand}"
+                Command="{Binding SaveMeasurementCommand}"
                 HorizontalOptions="Center" />
 
             <CollectionView ItemsSource="{Binding Measurements}">
@@ -49,7 +49,7 @@
                             <Label Grid.Column="1" Text="{Binding MeasurementDate, StringFormat='{0:d}'}" VerticalOptions="Center" />
                             <Button Grid.Column="2" 
                                     Text="Delete"
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=DeleteCommand}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=DeleteMeasurementCommand}"
                                     CommandParameter="{Binding .}"
                                     SemanticProperties.Hint="Deletes this temperature measurement"
                                     HeightRequest="40"
